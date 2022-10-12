@@ -2,18 +2,25 @@ package com.endava.internship.mocking.service;
 
 import com.endava.internship.mocking.model.Status;
 import com.endava.internship.mocking.model.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 class BasicValidationServiceTest {
 
-    private final BasicValidationService basicValidationService = new BasicValidationService();
+    private BasicValidationService basicValidationService;
 
+    @BeforeEach
+    void StartUp() {
+        basicValidationService = new BasicValidationService();
+    }
     @Test
-    void testValidateAmount() {
+    void shouldReturnExceptionOnValidateAmount() {
         // Given
 
         // When
@@ -28,7 +35,17 @@ class BasicValidationServiceTest {
     }
 
     @Test
-    void testValidatePaymentId() {
+    void testValidateAmount() {
+        // Given
+        double validAmount = 10D;
+
+        // When
+        basicValidationService.validateAmount(validAmount);
+
+        // Then
+    }
+    @Test
+    void shouldReturnExceptionOnValidatePaymentId() {
         // Given
 
         // When
@@ -39,7 +56,17 @@ class BasicValidationServiceTest {
     }
 
     @Test
-    void testValidateUserId() {
+    void testValidatePaymentId() {
+        // Given
+        UUID validPaymentId = UUID.randomUUID();
+
+        // When
+        basicValidationService.validatePaymentId(validPaymentId);
+
+        // Then
+    }
+    @Test
+    void shouldReturnExceptionOnValidateUserId() {
         // Given
 
         // When
@@ -47,11 +74,21 @@ class BasicValidationServiceTest {
         // Then
         assertThrows(IllegalArgumentException.class, nullUserId);
     }
+    @Test
+    void testValidateUserId() {
+        // Given
+        int validUserId = 10;
+
+        // When
+        basicValidationService.validateUserId(validUserId);
+
+        // Then
+    }
 
     @Test
-    void testValidateUser() {
+    void shouldReturnExceptionOnValidateUser() {
         // Given
-        User user = new User(1, "Name", Status.INACTIVE);
+        User user = new User(1, "John", Status.INACTIVE);
 
         // When
         Executable inactiveUser = () -> basicValidationService.validateUser(user);
@@ -59,9 +96,18 @@ class BasicValidationServiceTest {
         // Then
         assertThrows(IllegalArgumentException.class, inactiveUser);
     }
-
     @Test
-    void testValidateMessage() {
+    void testValidateUser() {
+        // Given
+        User user = new User(1, "John", Status.ACTIVE);
+
+        // When
+        basicValidationService.validateUser(user);
+
+        // Then
+    }
+    @Test
+    void shouldReturnExceptionOnValidateMessage() {
         // Given
         String message = null;
 
@@ -70,5 +116,15 @@ class BasicValidationServiceTest {
 
         // Then
         assertThrows(IllegalArgumentException.class, nullMessage);
+    }
+    @Test
+    void testValidateMessage() {
+        // Given
+        String validMessage = "message";
+
+        // When
+        basicValidationService.validateMessage(validMessage);
+
+        // Then
     }
 }

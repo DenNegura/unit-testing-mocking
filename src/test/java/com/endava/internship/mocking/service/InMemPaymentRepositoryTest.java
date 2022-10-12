@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,7 +21,7 @@ class InMemPaymentRepositoryTest {
 
     private InMemPaymentRepository paymentRepository;
 
-    private final static List<Payment> payments = Stream.of(
+    private final static List<Payment> PAYMENTS = Stream.of(
                 new Payment(1, 1D, "msg1"),
                 new Payment(2, 2D, "msg2"),
                 new Payment(3, 3D, "msg3"),
@@ -37,10 +38,10 @@ class InMemPaymentRepositoryTest {
         // Given
 
         // When
-        Payment savedPayment = paymentRepository.save(payments.get(0));
+        Payment savedPayment = paymentRepository.save(PAYMENTS.get(0));
 
         // Then
-        assertThat(savedPayment).isEqualToComparingFieldByField(payments.get(0));
+        assertThat(savedPayment).isEqualToComparingFieldByField(PAYMENTS.get(0));
     }
     @Test
     void shouldReturnExceptionWhenSaveNullPayment() {
@@ -56,10 +57,10 @@ class InMemPaymentRepositoryTest {
     @Test
     void shouldReturnExceptionWhenPaymentExist() {
         // Given
-        paymentRepository.save(payments.get(0));
+        paymentRepository.save(PAYMENTS.get(0));
 
         // When
-        Executable existPayment = () -> paymentRepository.save(payments.get(0));
+        Executable existPayment = () -> paymentRepository.save(PAYMENTS.get(0));
 
         // Then
         assertThrows(IllegalArgumentException.class, existPayment);
@@ -79,25 +80,25 @@ class InMemPaymentRepositoryTest {
     @Test
     void shouldReturnPaymentFindById() {
         // Given
-        paymentRepository.save(payments.get(0));
-        paymentRepository.save(payments.get(1));
+        paymentRepository.save(PAYMENTS.get(0));
+        paymentRepository.save(PAYMENTS.get(1));
 
         // When
-        Optional<Payment> findPayment = paymentRepository.findById(payments.get(0).getPaymentId());
+        Optional<Payment> findPayment = paymentRepository.findById(PAYMENTS.get(0).getPaymentId());
 
         // Then
         assertTrue(findPayment.isPresent());
-        assertThat(findPayment.get()).isEqualToComparingFieldByField(payments.get(0));
+        assertThat(findPayment.get()).isEqualToComparingFieldByField(PAYMENTS.get(0));
     }
 
     @Test
     void shouldReturnNullFindById() {
         // Given
-        paymentRepository.save(payments.get(0));
-        paymentRepository.save(payments.get(1));
+        paymentRepository.save(PAYMENTS.get(0));
+        paymentRepository.save(PAYMENTS.get(1));
 
         // When
-        Optional<Payment> nullPayment = paymentRepository.findById(payments.get(2).getPaymentId());
+        Optional<Payment> nullPayment = paymentRepository.findById(PAYMENTS.get(2).getPaymentId());
 
         assertFalse(nullPayment.isPresent());
     }
@@ -116,16 +117,16 @@ class InMemPaymentRepositoryTest {
     @Test
     void shouldReturnAllPayments() {
         // Given
-        paymentRepository.save(payments.get(0));
-        paymentRepository.save(payments.get(1));
-        paymentRepository.save(payments.get(2));
+        paymentRepository.save(PAYMENTS.get(0));
+        paymentRepository.save(PAYMENTS.get(1));
+        paymentRepository.save(PAYMENTS.get(2));
 
         // When
         List<Payment> allPaymentsList = paymentRepository.findAll();
 
         // Then
         assertThat(allPaymentsList)
-                .containsOnly(payments.get(0), payments.get(1), payments.get(2));
+                .containsOnly(PAYMENTS.get(0), PAYMENTS.get(1), PAYMENTS.get(2));
     }
 
     @Test
@@ -136,13 +137,13 @@ class InMemPaymentRepositoryTest {
         Executable nullIdPayment = () -> paymentRepository.editMessage(null, "msg");
 
         // Then
-        assertThrows(IllegalArgumentException.class, nullIdPayment);
+        assertThrows(NoSuchElementException.class, nullIdPayment);
     }
 
     @Test
     void shouldReturnPaymentWithNewMessage() {
         // Given
-        Payment payment = payments.get(0);
+        Payment payment = PAYMENTS.get(0);
         paymentRepository.save(payment);
         String newMsg = "new msg";
 

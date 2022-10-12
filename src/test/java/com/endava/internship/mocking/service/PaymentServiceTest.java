@@ -5,7 +5,6 @@ import com.endava.internship.mocking.model.Status;
 import com.endava.internship.mocking.model.User;
 import com.endava.internship.mocking.repository.InMemPaymentRepository;
 import com.endava.internship.mocking.repository.InMemUserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -24,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,25 +37,20 @@ class PaymentServiceTest {
     @Mock
     private BasicValidationService validationService;
     @InjectMocks
-    private PaymentService paymentService =
-            new PaymentService(userRepository, paymentRepository, validationService);
-    @BeforeEach
-    void setUp() {
-
-    }
-
+    private PaymentService paymentService;
     @Test
     void createPayment() {
         // Given
         double amount = 1D;
+        String message = "Payment from user John";
         User user = new User(1, "John", Status.ACTIVE);
-        Payment expectedPayment = new Payment(user.getId(), amount, "Payment from user John");
+        Payment expectedPayment = new Payment(user.getId(), amount, message);
         ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
 
         // When
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(paymentRepository.save(any())).thenReturn(expectedPayment);
-        Payment result = paymentService.createPayment(user.getId(), amount);
+        when(paymentRepository.save(any(Payment.class))).thenReturn(expectedPayment);
+        paymentService.createPayment(user.getId(), amount);
         verify(paymentRepository).save(paymentCaptor.capture());
 
         // Then
@@ -65,6 +60,7 @@ class PaymentServiceTest {
         verify(validationService).validateUserId(user.getId());
         verify(validationService).validateAmount(amount);
         verify(validationService).validateUser(user);
+        verifyNoMoreInteractions(validationService);
     }
     @Test
     void shouldReturnExceptionWhenCreatePayment() {
@@ -97,14 +93,16 @@ class PaymentServiceTest {
     @Test
     void editMessage() {
         //Given
-        Payment paymentOldMsg = new Payment(1, 1D, "old message");
-        Payment paymentNewMsg = new Payment(1, 1D, "new message");
+        String oldMessage = "old massage";
+        String newMessage = "new message";
+        Payment paymentOldMsg = new Payment(1, 1D, oldMessage);
+        Payment paymentNewMsg = new Payment(1, 1D, newMessage);
 
         //When
-        when(paymentRepository.editMessage(paymentOldMsg.getPaymentId(), "new message"))
+        when(paymentRepository.editMessage(paymentOldMsg.getPaymentId(), newMessage))
                 .thenReturn(paymentNewMsg);
         Payment result = paymentService
-                .editPaymentMessage(paymentOldMsg.getPaymentId(), "new message");
+                .editPaymentMessage(paymentOldMsg.getPaymentId(), newMessage);
 
         //Then
         assertThat(result).isEqualToComparingFieldByField(paymentNewMsg);
